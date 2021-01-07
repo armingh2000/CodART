@@ -1,5 +1,3 @@
-__author__  = 'Armin Gholampoor (@github:armingh2000)'
-
 from antlr4 import *
 from refactorings.gen.Java9_v2Listener import Java9_v2Listener
 from refactorings.gen.Java9_v2Parser import Java9_v2Parser
@@ -104,6 +102,7 @@ class RenameFieldRefactoringListener (Java9_v2Listener):
         if self.enter_class:
             if ctx.identifier().getText() == self.field_identifier:
                 interval = ctx.identifier().getSourceInterval()
+                self.token_stream_rewriter.replaceRange(interval[0], interval[1], text = self.new_field_identifier)
 
     # Exit a parse tree produced by Java9_v2Parser#fieldAccess_lfno_primary2.
     def exitFieldAccess_lfno_primary2(self, ctx:Java9_v2Parser.FieldAccess_lfno_primary2Context):
