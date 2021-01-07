@@ -19,6 +19,7 @@ from antlr4 import *
 from refactorings.rename_field import RenameFieldRefactoringListener
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from refactorings.rename_method import RenameMethodListener
 
 #from speedy.src.java9speedy.parser import sa_java9_v2
 
@@ -46,8 +47,8 @@ def main(args):
     # Step 6: Create an instance of AssignmentStListener
     #my_listener = ExtractClassRefactoringListener(common_token_stream=token_stream, class_identifier='Worker')
     tree = parser.compilationUnit()
-    my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="A", field_identifier="g", new_field_identifier="gg")
-
+    #my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="A", field_identifier="g", new_field_identifier="gg")
+    my_listener = RenameMethodListener(common_token_stream=token_stream, method_name="printG", new_method_name="printg")
     # return
     walker = ParseTreeWalker()
     walker.walk(t=tree, listener=my_listener)

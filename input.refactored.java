@@ -2,7 +2,7 @@
 class A
 {
     public int f; /* printF , printF, */
-    public int gg; /* printF, printG */
+    public int g; /* printF, printG */
     public string h; /* printH */
 
     // Method 1
@@ -14,12 +14,18 @@ class A
     // Method 2
     void printF(float i){
         this.f = (int) (i * this.f);
-        this.gg = (int) (i * this.gg);
+        this.g = (int) (i * this.g);
     }
 
     // Method 3
-    void printG(){
-        print(this.gg);
+     void printg(){
+        print(this.g);
+        printg();
+        A.printg();
+        A a = new A();
+        a.printg();
+        var b =  A :: printG;
+        var c = a :: printG;
     }
 
     // Method 4

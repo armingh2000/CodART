@@ -18,8 +18,14 @@ class A
     }
 
     // Method 3
-    void printG(){
+     void printG(){
         print(this.g);
+        printG();
+        A.printG();
+        A a = new A();
+        a.printG();
+        var b =  A :: printG;
+        var c = a :: printG;
     }
 
     // Method 4
