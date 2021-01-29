@@ -47,8 +47,11 @@ def main(args):
     # Step 6: Create an instance of AssignmentStListener
     #my_listener = ExtractClassRefactoringListener(common_token_stream=token_stream, class_identifier='Worker')
     tree = parser.compilationUnit()
+    if(args.method == 'rename_method'):
     # my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="SequenceDiagramModule", field_identifier="propPanelFactory", new_field_identifier="Hadi")
-    my_listener = RenameMethodListener(common_token_stream=token_stream, class_identifier='A' ,method_name="printG", new_method_name="printg")
+        my_listener = RenameMethodListener(common_token_stream=token_stream, class_identifier='A' ,method_name="printG", new_method_name="printg")
+    elif(args.method == 'rename_field'):
+        my_listener = RenameMethodListener(common_token_stream=token_stream, class_identifier='A', method_name="printG", new_method_name="printg")
     # return
     walker = ParseTreeWalker()
     walker.walk(t=tree, listener=my_listener)
@@ -56,10 +59,30 @@ def main(args):
     with open('input.refactored.java', mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-if __name__ == '__main__':
+
+import os
+
+
+def recursive_walk(directory):
+    for dirname, dirs, files in os.walk(directory):
+        for filename in files:
+            filename_without_extension, extension = os.path.splitext(filename)
+            if(extension == '.java'):
+                process_file("{}/{}".format(directory, filename))
+        for dir in dirs:
+            recursive_walk("{}/{}".format(directory, dir))
+def process_file(file):
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
         '-n', '--file',
-        help='Input source', default=r'input.java')
+        help='Input source', default=file)
+    argparser.add_argument(
+        '--method', help='Refactoring Method', default='rename_method')
+
     args = argparser.parse_args()
     main(args)
+
+if __name__ == '__main__':
+    directory = '../xerces2-j/src'
+    # recursive_walk(directory) # for test on a project
+    process_file(r'input.java')
