@@ -20,13 +20,13 @@ class C
      void printG(){
         print(this.g);
         printG();
-        A.printg();
+        A.printG();
         A a = new A();
         C c = new C();
         c.printG();
         C.printG();
         a.printg();
-        var b =  A :: printg;
+        var b =  A :: printG;
         var d = a :: printg;
     }
 
@@ -56,11 +56,11 @@ class A
     // Method 3
      void printg(){
         print(this.g);
-        printG();
-        A.printg();
-        A a = new A();
-        a.printg();
-        var b =  A :: printg;
+        printg();
+        A.printG();
+        A[] a = new A[45];
+        a[0].printg();
+        var b =  A :: printG;
         var c = a :: printg;
     }
 

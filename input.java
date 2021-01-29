@@ -58,8 +58,8 @@ class A
         print(this.g);
         printG();
         A.printG();
-        A a = new A();
-        a.printG();
+        A[] a = new A[45];
+        a[0].printG();
         var b =  A :: printG;
         var c = a :: printG;
     }

@@ -6,7 +6,7 @@ from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 class RenameMethodListener(JavaParserLabeledListener):
-    def __init__(self, common_token_stream: CommonTokenStream = None, class_identifier : str = None, method_name : str = '', new_method_name : str = ''):
+    def __init__(self, common_token_stream: CommonTokenStream = None, class_identifier : str = None, method_name : str = '', new_method_name : str = '', is_static=False):
         self.enter_class = False if class_identifier else True
         self.token_stream = common_token_stream
         self.method_name = method_name
@@ -15,6 +15,7 @@ class RenameMethodListener(JavaParserLabeledListener):
         self.scope_handler = ScopeHandler()
         self.symbol_table = SymbolTable()
         self.last_used_type = None
+        self.is_static = is_static
         if common_token_stream is not None:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         else:
@@ -57,14 +58,18 @@ class RenameMethodListener(JavaParserLabeledListener):
             interval = ctx.IDENTIFIER().getSourceInterval()
             self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
         self.scope_handler.exitMethod(ctx.IDENTIFIER().getText())
+
     def exitExpression1(self, ctx:JavaParserLabeled.Expression1Context):
         if(ctx.methodCall() is not None):
-            if(ctx.expression().getText() == self.class_identifier):
+            if(ctx.expression().getText() == self.class_identifier and self.is_static):
                 interval = ctx.methodCall().IDENTIFIER().getSourceInterval()
                 self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
-            else:
+            elif(not self.is_static):
                 text = ctx.expression().getText()
                 id = text.split('.')[-1]
+                idx = id.find('[')
+                if(idx != -1):
+                    id = id[:idx]
                 if(self.symbol_table.IsClassName(id)):
                     return
                 type = self.symbol_table.FindVariableType(self.scope_handler.getScope(), id)
@@ -72,19 +77,23 @@ class RenameMethodListener(JavaParserLabeledListener):
                     interval = ctx.methodCall().IDENTIFIER().getSourceInterval()
                     self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
 
+    def exitExpression3(self, ctx:JavaParserLabeled.Expression3Context):
+        if(self.enter_class and ctx.methodCall().IDENTIFIER().getText() == self.method_name):
+            interval = ctx.methodCall().IDENTIFIER().getSourceInterval()
+            self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
 
-    # def exitMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
-    #     if (ctx.IDENTIFIER().getText() == self.method_name):
-    #         interval = ctx.IDENTIFIER().getSourceInterval()
-    #         self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
     def exitExpression23(self, ctx:JavaParserLabeled.Expression23Context):
         if (ctx.IDENTIFIER().getText() == self.method_name):
-            interval = ctx.IDENTIFIER().getSourceInterval()
-            self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
-    def exitExpression24(self, ctx:JavaParserLabeled.Expression24Context):
-        if (ctx.IDENTIFIER().getText() == self.method_name):
-            interval = ctx.IDENTIFIER().getSourceInterval()
-            self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
+            text = ctx.expression().getText()
+            id = text.split('.')[-1]
+            if(id == self.class_identifier and self.is_static):
+                interval = ctx.IDENTIFIER().getSourceInterval()
+                self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
+            elif not(self.is_static):
+                type = self.symbol_table.FindVariableType(self.scope_handler.getScope(), id)
+                if (type is not None and type == self.class_identifier):
+                    interval = ctx.IDENTIFIER().getSourceInterval()
+                    self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
 
 
 class SymbolTable:
@@ -111,9 +120,8 @@ class SymbolTable:
             key = '{}.{}'.format(scope, identifier)
             if(key in self.data):
                 result = self.data[key]
-        if(result is None):
-            print("Undefined variable {}".format(identifier))
         return result
+
 class ScopeHandler:
     def __init__(self):
         self.__used_functions = {}
