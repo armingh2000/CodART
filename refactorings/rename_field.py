@@ -30,7 +30,7 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
     # Enter a parse tree produced by JavaParserLabeled#variableDeclaratorId.
     def enterVariableDeclaratorId(self, ctx:JavaParserLabeled.VariableDeclaratorIdContext):
         if self.enter_class:
-            if ctx.IDENTIFIER().getText() == self.field_identifier:
+            if ctx.IDENTIFIER() is not None and ctx.IDENTIFIER().getText() == self.field_identifier:
                 interval = ctx.getSourceInterval()
                 self.token_stream_rewriter.replaceRange(interval[0], interval[1], text = self.new_field_identifier)
 
@@ -41,7 +41,7 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
     # Enter a parse tree produced by JavaParserLabeled#expression1.
     def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
         if self.enter_class:
-            if ctx.IDENTIFIER().getText() == self.field_identifier:
+            if ctx.IDENTIFIER() is not None and ctx.IDENTIFIER().getText() == self.field_identifier:
                 interval = ctx.IDENTIFIER().getSourceInterval()
                 self.token_stream_rewriter.replaceRange(interval[0], interval[1], text = self.new_field_identifier)
 
