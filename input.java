@@ -26,6 +26,8 @@ class C
         c.printG();
         C.printG();
         a.printG();
+        a.g = 2;
+        c.g = 3;
         var b =  A :: printG;
         var d = a :: printG;
     }

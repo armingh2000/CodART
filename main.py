@@ -50,7 +50,9 @@ def main(args):
     if(args.method == 'rename_method'):
         my_listener = RenameMethodListener(common_token_stream=token_stream, class_identifier='A' ,method_name="printG", new_method_name="printg")
     elif(args.method == 'rename_field'):
-        my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="SequenceDiagramModule", field_identifier="propPanelFactory", new_field_identifier="Hadi")
+        my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="SequenceDiagramModule", field_identifier="propPanelFactory", new_field_identifier="PPT")
+        #my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="C", field_identifier="g", new_field_identifier="gg")
+
     # return
     walker = ParseTreeWalker()
     walker.walk(t=tree, listener=my_listener)
