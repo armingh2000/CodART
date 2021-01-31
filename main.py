@@ -48,10 +48,9 @@ def main(args):
     #my_listener = ExtractClassRefactoringListener(common_token_stream=token_stream, class_identifier='Worker')
     tree = parser.compilationUnit()
     if(args.method == 'rename_method'):
-    # my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="SequenceDiagramModule", field_identifier="propPanelFactory", new_field_identifier="Hadi")
         my_listener = RenameMethodListener(common_token_stream=token_stream, class_identifier='A' ,method_name="printG", new_method_name="printg")
     elif(args.method == 'rename_field'):
-        my_listener = RenameMethodListener(common_token_stream=token_stream, class_identifier='A', method_name="printG", new_method_name="printg")
+        my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="SequenceDiagramModule", field_identifier="propPanelFactory", new_field_identifier="Hadi")
     # return
     walker = ParseTreeWalker()
     walker.walk(t=tree, listener=my_listener)
@@ -77,7 +76,7 @@ def process_file(file):
         '-n', '--file',
         help='Input source', default=file)
     argparser.add_argument(
-        '--method', help='Refactoring Method', default='rename_method')
+        '--method', help='Refactoring Method', default='rename_field')
 
     args = argparser.parse_args()
     main(args)
@@ -85,4 +84,4 @@ def process_file(file):
 if __name__ == '__main__':
     directory = '../xerces2-j/src'
     # recursive_walk(directory) # for test on a project
-    process_file(r'input.java')
+    process_file(r'input2.java')
