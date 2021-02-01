@@ -1,104 +1,80 @@
-package org.argouml.sequence2;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.argouml.moduleloader.ModuleInterface;
-import org.argouml.notation.Notation;
-import org.argouml.notation.NotationName;
-import org.argouml.notation.NotationProviderFactory2;
-import org.argouml.notation.providers.uml.SDMessageNotationUml;
-import org.argouml.persistence.PersistenceManager;
-import org.argouml.sequence2.diagram.SequenceDiagramFactory;
-import org.argouml.uml.diagram.DiagramFactory;
-import org.argouml.uml.diagram.DiagramFactory.DiagramType;
-import org.argouml.uml.diagram.DiagramFactoryInterface2;
+package game;
 
-public class SequenceDiagramModule implements ModuleInterface {
+import java.util.*;
 
-    private static final Logger LOG =
-        Logger.getLogger(SequenceDiagramModule.class.getName());
+public abstract class Piece
+{
+    public int y;
+    public char x;
+    public boolean color;
+    public String name;
 
-    private SequenceDiagramPropPanelFactory PPT;
-
-    public boolean enable() {
-
-        PPT =
-            new SequenceDiagramPropPanelFactory();
-        PropPanelFactoryManager.addPropPanelFactory(PPT);
-        // TODO: Remove the casting to DiagramFactoryInterface2
-        // as soon as DiagramFactoryInterface is removed.
-        DiagramFactory.getInstance().registerDiagramFactory(
-                DiagramType.Sequence,
-                (DiagramFactoryInterface2) new SequenceDiagramFactory());
-
-        NotationProviderFactory2 npf = NotationProviderFactory2.getInstance();
-        NotationName nn = Notation.findNotation(Notation.DEFAULT_NOTATION);
-        npf.addNotationProvider(NotationProviderFactory2.TYPE_SD_MESSAGE,
-                nn, SDMessageNotationUml.class);
-
-        PersistenceManager persistanceManager =
-            PersistenceManager.getInstance();
-
-        // Translate any old style sequence diagrams
-        persistanceManager.addTranslation(
-                "org.argouml.uml.diagram.sequence.ui.UMLSequenceDiagram",
-                "org.argouml.sequence2.diagram.UMLSequenceDiagram");
-        persistanceManager.addTranslation(
-                "org.argouml.uml.diagram.sequence.ui.FigCreateActionMessage",
-                "org.argouml.sequence2.diagram.FigMessage");
-
-        LOG.log(Level.INFO, "SequenceDiagram Module enabled.");
-        return true;
+    public Piece(char x, int y, boolean color, String name)
+    {
+        SETx_MotherFucker(x);
+        setY(y);
+        setColor(color);
+        setName(name);
     }
 
-    public boolean disable() {
-
-        PropPanelFactoryManager.removePropPanelFactory(PPT);
-
-        // TODO: Remove the casting to DiagramFactoryInterface2
-        // as soon as DiagramFactoryInterface is removed.
-        DiagramFactory.getInstance().registerDiagramFactory(
-                DiagramType.Sequence, (DiagramFactoryInterface2) null);
-
-        LOG.log(Level.INFO, "SequenceDiagram Module disabled.");
-        return true;
+    public void setY(int y)
+    {
+        this.y = y;
     }
 
-    public String getName() {
-        return "ArgoUML-Sequence";
+    public void SETx_MotherFucker(char x)
+    {
+        this.x = x;
     }
 
-    public String getInfo(int type) {
-        switch (type) {
-        case DESCRIPTION:
-            return "The new sequence diagram implementation";
-        case AUTHOR:
-            return "Christian L\u00f3pez Esp\u00ednola";
-        case VERSION:
-            return "0.28";
-        case DOWNLOADSITE:
-            return "http://argouml-sequence.tigris.org";
-        default:
-            return null;
-        }
+    public void setName(String name)
+    {
+        this.name = name;
     }
-}
 
-class SequenceDiagramPropPanelFactory implements PropPanelFactory {
+    public void setColor(boolean color)
+    {
+        this.color = color;
+    }
 
-    public PropPanel createPropPanel(Object object) {
-        if (object instanceof UMLSequenceDiagram) {
-            return new PropPanelUMLSequenceDiagram();
+    public int getY()
+    {
+        return this.y;
+    }
+
+    public char getX()
+    {
+        return this.x;
+    }
+
+    public String getName()
+    {
+        return this.name;
+    }
+
+    public boolean getColor()
+    {
+        return this.color;
+    }
+
+    public static Piece checkTaken(ArrayList<Piece> pieces, char x, int y)
+    {
+        for(Piece p : pieces)
+        {
+            if( p.x == x && p.y == y )
+            {
+                return p;
+            }
         }
         return null;
     }
 
-    class PropPanelUMLSequenceDiagram extends PropPanelDiagram {
-
-
-        public PropPanelUMLSequenceDiagram() {
-            super(Translator.localize("label.sequence-diagram"),
-                    lookupIcon("SequenceDiagram"));
-        }
-
+    public boolean crossMove(char x, int y)
+    {
+        return false;
     }
+
+    public abstract boolean canMove(char x, int y);
+
+    public abstract boolean checkWay(ArrayList<Piece> pieces, char x, int y);
 }

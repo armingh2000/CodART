@@ -37,7 +37,7 @@ class C
         print(this.h);
     }
 }/* Before refactoring (Original version) */
-class A
+class A implements I1, I2, I3
 {
     public int f; /* printF , printF, */
     public int g; /* printF, printG */
