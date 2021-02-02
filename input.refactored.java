@@ -17,13 +17,13 @@ public class SequenceDiagramModule implements ModuleInterface {
     private static final Logger LOG =
         Logger.getLogger(SequenceDiagramModule.class.getName());
 
-    private SequenceDiagramPropPanelFactory PPT;
+    private SequenceDiagramPropPanelFactory propPanelFactory;
 
     public boolean enable() {
 
-        PPT =
+        propPanelFactory =
             new SequenceDiagramPropPanelFactory();
-        PropPanelFactoryManager.addPropPanelFactory(PPT);
+        PropPanelFactoryManager.addPropPanelFactory(propPanelFactory);
         // TODO: Remove the casting to DiagramFactoryInterface2
         // as soon as DiagramFactoryInterface is removed.
         DiagramFactory.getInstance().registerDiagramFactory(
@@ -52,7 +52,7 @@ public class SequenceDiagramModule implements ModuleInterface {
 
     public boolean disable() {
 
-        PropPanelFactoryManager.removePropPanelFactory(PPT);
+        PropPanelFactoryManager.removePropPanelFactory(propPanelFactory);
 
         // TODO: Remove the casting to DiagramFactoryInterface2
         // as soon as DiagramFactoryInterface is removed.

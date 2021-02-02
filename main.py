@@ -20,6 +20,7 @@ from refactorings.rename_field import RenameFieldRefactoringListener
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from refactorings.rename_method import RenameMethodListener
+from refactorings.rcf import RemoveControlFlagRefactoringListener
 
 #from speedy.src.java9speedy.parser import sa_java9_v2
 
@@ -51,6 +52,8 @@ def main(args):
         my_listener = RenameMethodListener(common_token_stream=token_stream, class_identifier='A' ,method_name="printG", new_method_name="printg")
     elif(args.method == 'rename_field'):
         my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="SequenceDiagramModule", field_identifier="propPanelFactory", new_field_identifier="PPT")
+    elif(args.method == 'remove_control_flag'):
+        my_listener = RemoveControlFlagRefactoringListener(common_token_stream=token_stream)
         #my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="C", field_identifier="g", new_field_identifier="gg")
 
     # return
@@ -78,7 +81,7 @@ def process_file(file):
         '-n', '--file',
         help='Input source', default=file)
     argparser.add_argument(
-        '--method', help='Refactoring Method', default='rename_field')
+        '--method', help='Refactoring Method', default='remove_control_flag')
 
     args = argparser.parse_args()
     main(args)
