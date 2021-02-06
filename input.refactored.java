@@ -1,15 +1,54 @@
 public class Main {
 	public static void main(String[] people) {
         
-		while(found){
-				if (people[i] == "Don") {
+		for(Person p : people){
+				if (p == "Don") {
 					sendAlert();
 					break;
 				}
-				if (people[i] == "John") {
+				if (p == "John") {
 					sendAlert();
 					break;
 				}
 			}
+
+        
+		for(Person p : people)
+			{
+				if (p == "Don") {
+					sendAlert();
+					break;
+				}
+				if (p == "John") {
+					sendAlert();
+					break;
+				}
+			}
+
+
+        
+		while(true){
+            if (p == "Don") {
+                sendAlert();
+                break;
+            }
+            if (p == "John") {
+                sendAlert();
+                break;
+            }
+        }
+
+        
+		while(true){
+            if (p == "Don") {
+                sendAlert();
+                break;
+            }
+            if (p == "John") {
+                sendAlert();
+                break;
+            }
+
+        }
 	}
 }
