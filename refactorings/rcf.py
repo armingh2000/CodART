@@ -13,7 +13,7 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
         self.ifStmnt = None
         self.relevantVariableValue = None
         self.lastOccurance = dict()
-
+        self.hasBlock = False
         if common_token_stream is not None:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         else:
@@ -23,6 +23,7 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
     def enterStatement3(self, ctx:JavaParserLabeled.Statement3Context):
         if isinstance(ctx.statement(), JavaParserLabeled.Statement0Context):
             self.ifStmnt = ctx.statement().block().blockStatement(0).statement()
+            self.hasBlock = True
             if isinstance(self.ifStmnt, JavaParserLabeled.Statement2Context):
                 exp = self.ifStmnt.parExpression().expression()
                 if isinstance(exp, JavaParserLabeled.Expression0Context):
@@ -42,7 +43,7 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
 
 
         elif isinstance(ctx.statement(), JavaParserLabeled.Statement2Context):
-            self.ifStmnt = ctx
+            self.ifStmnt = ctx.statement()
             exp = self.ifStmnt.parExpression().expression()
             if isinstance(exp, JavaParserLabeled.Expression0Context):
                 prm = exp.primary()
@@ -62,12 +63,20 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
     # Exit a parse tree produced by JavaParserLabeled#statement3.
     def exitStatement3(self, ctx:JavaParserLabeled.Statement3Context):
         if self.isRelevant:
-            interval = self.ifStmnt.parentCtx.parentCtx.getSourceInterval()
-            stmnt = self.ifStmnt.statement(0)
-            interval2 = stmnt.getSourceInterval()
-            self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.token_stream_rewriter.getText('default', interval2[0], interval2[1]))
-            declarationInterval = self.lastOccurance[self.relevantVariable].getSourceInterval()
-            self.token_stream_rewriter.replaceRange(declarationInterval[0], declarationInterval[1], "")
+            if(not self.hasBlock):
+                interval = self.ifStmnt.getSourceInterval()
+                stmnt = self.ifStmnt.statement(0)
+                interval2 = stmnt.getSourceInterval()
+                self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.token_stream_rewriter.getText('default', interval2[0] , interval2[1]))
+                declarationInterval = self.lastOccurance[self.relevantVariable].getSourceInterval()
+                self.token_stream_rewriter.replaceRange(declarationInterval[0], declarationInterval[1], "")
+            else:
+                interval = self.ifStmnt.parentCtx.parentCtx.getSourceInterval()
+                stmnt = self.ifStmnt.statement(0)
+                interval2 = stmnt.getSourceInterval()
+                self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.token_stream_rewriter.getText('default', interval2[0], interval2[1]))
+                declarationInterval = self.lastOccurance[self.relevantVariable].getSourceInterval()
+                self.token_stream_rewriter.replaceRange(declarationInterval[0], declarationInterval[1], "")
         self.isRelevant -= 1
 
 

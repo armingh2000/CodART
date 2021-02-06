@@ -129,6 +129,6 @@ if __name__ == '__main__':
         os.mkdir("refactored")
 
     directory = '../Chess/'
-    recursive_walk(directory, 'inheritance_relations') # for test on a project
-    recursive_walk(directory, 'rename_field')
-    # process_file(r'../Chess/src/database/Player.java')
+    # recursive_walk(directory, 'inheritance_relations') # for test on a project
+    # recursive_walk(directory, 'rename_field')
+    process_file(r'rcf.java', 'remove_control_flag')

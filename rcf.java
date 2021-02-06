@@ -1,8 +1,7 @@
 public class Main {
 	public static void main(String[] people) {
-		boolean found = false;
-		for (i = 0; i < count(people); i++) {
-			if (!found) {
+        bool found = true;
+		while(found){
 				if (people[i] == "Don") {
 					sendAlert();
 					found = true;
@@ -11,7 +10,6 @@ public class Main {
 					sendAlert();
 					found = true;
 				}
-			}
-		}
+        }
 	}
 }
