@@ -2,6 +2,7 @@ public class Main {
 	public static void main(String[] people) {
         bool found = true;
 		while(found){
+			if (!found) {
 				if (people[i] == "Don") {
 					sendAlert();
 					found = true;
@@ -10,6 +11,7 @@ public class Main {
 					sendAlert();
 					found = true;
 				}
+			}
         }
 	}
 }

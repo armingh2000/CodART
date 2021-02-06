@@ -1,6 +1,5 @@
 
-__author__  = 'Armin Gholampoor (@github:armingh2000) - Hadi Sheikhi (@github:...)'
-#hadi age khasti username githubeto bezan bala
+__author__  = 'Armin Gholampoor (@github:armingh2000) - Hadi Sheikhi (@github:Hadishh)'
 from antlr4 import *
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled

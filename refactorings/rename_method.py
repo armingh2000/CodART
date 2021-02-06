@@ -1,3 +1,4 @@
+__author__  = 'Hadi Sheikhi (@github:Hadishh)'
 
 from gen.javaLabeled.JavaLexer import  JavaLexer
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
@@ -31,13 +32,10 @@ class RenameMethodListener(JavaParserLabeledListener):
 
     def exitPrimitiveType(self, ctx:JavaParserLabeled.PrimitiveTypeContext):
         self.last_used_type = ctx.getText()
-
     def exitClassOrInterfaceType(self, ctx:JavaParserLabeled.ClassOrInterfaceTypeContext):
         self.last_used_type = ctx.IDENTIFIER()[-1].getText()
-
     def exitVariableDeclaratorId(self, ctx:JavaParserLabeled.VariableDeclaratorIdContext):
         self.symbol_table.Insert(self.scope_handler.getScope(), ctx.IDENTIFIER().getText(), self.last_used_type)
-
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         id = ctx.IDENTIFIER().getText()
         self.scope_handler.enterClass(id)
@@ -45,7 +43,6 @@ class RenameMethodListener(JavaParserLabeledListener):
         self.enter_class = id == self.class_identifier
         if(id in self.extentions or id in self.implementations):
             self.enter_class = True
-
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         self.scope_handler.exitClass(ctx.IDENTIFIER().getText())
         self.enter_class = False
@@ -123,7 +120,7 @@ class RenameMethodListener(JavaParserLabeledListener):
     def exitExpression23(self, ctx:JavaParserLabeled.Expression23Context):
         if (ctx.IDENTIFIER().getText() == self.method_name):
             text = ctx.expression().getText()
-            id = text.split('.')[-1]
+            id = text.split('.')[-1].split('=')[-1]
             if(id == self.class_identifier and self.is_static):
                 interval = ctx.IDENTIFIER().getSourceInterval()
                 self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
@@ -177,7 +174,6 @@ class ScopeHandler:
         self.__used_functions = {}
         self.__scope = []
         self.__exited_blocks = []
-
     def enterClass(self, class_name):
         self.__scope.append(class_name)
         self.__used_functions.clear()
@@ -203,7 +199,6 @@ class ScopeHandler:
         self.__scope.append("block_{}".format(len(self.__exited_blocks)))
         self.__exited_blocks.append(False)
     def exitBlock(self):
-        # identify last not exited block
         block_number = None
         for idx, item in enumerate(self.__exited_blocks):
             if not item:
