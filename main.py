@@ -52,6 +52,9 @@ def main(args):
     #my_listener = ExtractClassRefactoringListener(common_token_stream=token_stream, class_identifier='Worker')
     tree = parser.compilationUnit()
     class_id = 'Piece'
+    field_id = "y"
+    new_field_id = "Y_CHANGED"
+
     if(args.method == 'rename_method'):
         my_listener = RenameMethodListener(
             common_token_stream=token_stream,
@@ -61,11 +64,19 @@ def main(args):
             is_static=False,
             extentions=extensions,
             implementations=implementations)
+
     elif(args.method == 'rename_field'):
-        my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="SequenceDiagramModule", field_identifier="propPanelFactory", new_field_identifier="PPT")
+        my_listener = RenameFieldRefactoringListener(
+            common_token_stream = token_stream,
+            class_identifier = class_id,
+            field_identifier = field_id,
+            new_field_identifier = new_field_id,
+            extentions = extensions,
+            implementations = implementations)
+
     elif(args.method == 'remove_control_flag'):
         my_listener = RemoveControlFlagRefactoringListener(common_token_stream=token_stream)
-        #my_listener = RenameFieldRefactoringListener(common_token_stream=token_stream, class_identifier="C", field_identifier="g", new_field_identifier="gg")
+
     elif(args.method == "inheritance_relations"):
         my_listener = ImplementaionIdentificationListener(class_id)
 
@@ -81,14 +92,22 @@ def main(args):
 
 
 import os
+import shutil
 
 
 def recursive_walk(directory, method):
     for dirname, dirs, files in os.walk(directory):
+        try:
+            os.mkdir(dirname.replace("..", "refactored"))
+        except:
+            pass
         for filename in files:
             filename_without_extension, extension = os.path.splitext(filename)
             if(extension == '.java'):
                 process_file("{}/{}".format(dirname, filename), method)
+            shutil.copyfile("input.refactored.java", dirname.replace("..", "refactored") + "/" + filename)
+
+
         # for dir in dirs:
         #     recursive_walk("{}/{}".format(directory, dir), method)
 def process_file(file, method):
@@ -103,7 +122,13 @@ def process_file(file, method):
     main(args)
 
 if __name__ == '__main__':
-    directory = '../Chess/src'
+    try:
+        os.mkdir("refactored")
+    except:
+        shutil.rmtree("refactored")
+        os.mkdir("refactored")
+
+    directory = '../Chess/'
     recursive_walk(directory, 'inheritance_relations') # for test on a project
-    recursive_walk(directory, 'rename_method')
+    recursive_walk(directory, 'rename_field')
     # process_file(r'../Chess/src/database/Player.java')
