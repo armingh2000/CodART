@@ -28,7 +28,11 @@ implementations = []
 def main(args):
     global extensions
     global implementations
-    stream = FileStream(args.file, encoding='utf8')
+    try:
+        stream = FileStream(args.file, encoding='utf-8-sig')
+    except UnicodeDecodeError:
+        print(f"Couldn't process {args.file}: Unicode Error")
+        return
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
@@ -84,7 +88,7 @@ def recursive_walk(directory, method):
             filename_without_extension, extension = os.path.splitext(filename)
             if(extension == '.java'):
                 process_file("{}/{}".format(dirname, filename), method)
-            shutil.copyfile("input.refactored.java", dirname.replace("..", "refactored") + "/" + filename)
+                shutil.copyfile("input.refactored.java", dirname.replace("..", "refactored") + "/" + filename)
 
 
         # for dir in dirs:
@@ -106,8 +110,13 @@ if __name__ == '__main__':
     except:
         shutil.rmtree("refactored")
         os.mkdir("refactored")
+    directory = '../TestProjects/argouml'
+    directories = directory.split('/')
+    current_dir = "refactored"
+    for dir in directories[1:-1]:
+        current_dir = current_dir + f'/{dir}'
+        os.mkdir(current_dir)
 
-    directory = '../Chess/'
-    # recursive_walk(directory, 'inheritance_relations') # for test on a project
-    # recursive_walk(directory, 'rename_field')
-    process_file(r'rcf.java', 'remove_control_flag')
+    recursive_walk(directory, 'inheritance_relations') # for test on a project
+    recursive_walk(directory, 'rename_field')
+    # process_file(r'rcf.java', 'remove_control_flag')
