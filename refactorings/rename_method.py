@@ -25,6 +25,8 @@ class RenameMethodListener(JavaParserLabeledListener):
         self.is_static = is_static
         self.extentions = extentions
         self.implementations = implementations
+        self.abort = (self.method_name == self.class_identifier)
+
         if common_token_stream is not None:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         else:
@@ -41,6 +43,8 @@ class RenameMethodListener(JavaParserLabeledListener):
     def exitVariableDeclaratorId(self, ctx:JavaParserLabeled.VariableDeclaratorIdContext):
         self.symbol_table.Insert(self.scope_handler.getScope(), ctx.IDENTIFIER().getText(), self.last_used_type)
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        if(self.scope_handler.variable_declarating):
+            return
         id = ctx.IDENTIFIER().getText()
         self.scope_handler.enterClass(id)
         self.symbol_table.AddnewClass(id)
@@ -48,6 +52,8 @@ class RenameMethodListener(JavaParserLabeledListener):
         if(id in self.extentions or id in self.implementations):
             self.enter_class = True
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        if (self.scope_handler.variable_declarating):
+            return
         self.scope_handler.exitClass(ctx.IDENTIFIER().getText())
         id = ctx.IDENTIFIER().getText()
         if(id == self.class_identifier):
@@ -65,7 +71,10 @@ class RenameMethodListener(JavaParserLabeledListener):
             interval = ctx.methodCall().IDENTIFIER().getSourceInterval()
             self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
     def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
+        scope = self.scope_handler.getScope()[-1]
         self.scope_handler.enterMethod(ctx.IDENTIFIER().getText())
+        if(ctx.IDENTIFIER().getText() == self.new_method_name and scope == self.class_identifier):
+            self.abort = True
     def enterConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
         self.scope_handler.enterMethod(ctx.IDENTIFIER().getText())
     def exitConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
@@ -91,41 +100,58 @@ class RenameMethodListener(JavaParserLabeledListener):
 
     def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
         last_scope = self.scope_handler.getScope()[-2]
-        if(self.method_name == ctx.IDENTIFIER().getText() and last_scope == self.class_identifier):
+        if(self.method_name == ctx.IDENTIFIER().getText() and last_scope == self.class_identifier and not self.abort):
             interval = ctx.IDENTIFIER().getSourceInterval()
             self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
         self.scope_handler.exitMethod(ctx.IDENTIFIER().getText())
 
     def exitExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+        if(self.abort):
+            return
         if(ctx.methodCall() is not None and ctx.methodCall().IDENTIFIER().getText() == self.method_name):
             if(ctx.expression().getText() == self.class_identifier and self.is_static):
                 interval = ctx.methodCall().IDENTIFIER().getSourceInterval()
                 self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
             elif(not self.is_static):
-                text = ctx.expression().getText()
+                if isinstance(ctx.expression(), JavaParserLabeled.Expression0Context) and isinstance(ctx.expression().primary(), JavaParserLabeled.Primary0Context):
+                    context = ctx.expression().primary().expression()
+                else:
+                    context = ctx.expression()
+
+                text = context.getText()
+                # type cast
+                type = None
+                if isinstance(context, JavaParserLabeled.Expression5Context):
+                    type = context.typeType().getText().split('.')[-1]
                 id = text.split('.')[-1]
                 idx = id.find('[')
                 if(idx != -1):
                     id = id[:idx]
                 elif("ArrayList" in id):
                     id = id[10: -1]
-                if(self.symbol_table.IsClassName(id)):
+                if(self.symbol_table.IsClassName(id) and type is None):
                     return
-                type = self.symbol_table.FindVariableType(self.scope_handler.getScope(), id)
+                if(type is None):
+                    type = self.symbol_table.FindVariableType(self.scope_handler.getScope(), id)
                 if( type is not None and (type == self.class_identifier or type in self.extentions or type in self.implementations)):
                     interval = ctx.methodCall().IDENTIFIER().getSourceInterval()
                     self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
 
     def exitExpression3(self, ctx:JavaParserLabeled.Expression3Context):
+        if (self.abort):
+            return
         try:
             id = ctx.methodCall().IDENTIFIER()
         except:
             return
-        if(self.enter_class and ctx.methodCall().IDENTIFIER().getText() == self.method_name):
+        scope = self.scope_handler.getScope()
+        if((self.enter_class or self.class_identifier in scope) and id.getText() == self.method_name):
             interval = ctx.methodCall().IDENTIFIER().getSourceInterval()
             self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_method_name)
 
     def exitExpression23(self, ctx:JavaParserLabeled.Expression23Context):
+        if (self.abort):
+            return
         if (ctx.IDENTIFIER().getText() == self.method_name):
             text = ctx.expression().getText()
             id = text.split('.')[-1].split('=')[-1]
