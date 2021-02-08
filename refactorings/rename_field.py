@@ -38,8 +38,13 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
     def exitClassOrInterfaceType(self, ctx:JavaParserLabeled.ClassOrInterfaceTypeContext):
         self.last_used_type = ctx.IDENTIFIER()[-1].getText()
 
+    def enterLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
+        self.scope_handler.enterVariableDeclaration()
+    def exitLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
+        self.scope_handler.exitVariableDeclaration()
     def exitVariableDeclaratorId(self, ctx:JavaParserLabeled.VariableDeclaratorIdContext):
         self.symbol_table.Insert(self.scope_handler.getScope(), ctx.IDENTIFIER().getText(), self.last_used_type)
+
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         id = ctx.IDENTIFIER().getText()
@@ -51,7 +56,9 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         self.scope_handler.exitClass(ctx.IDENTIFIER().getText())
-        self.enter_class = False
+        id = ctx.IDENTIFIER().getText()
+        if (id == self.class_identifier):
+            self.enter_class = False
 
     def enterInterfaceDeclaration(self, ctx:JavaParserLabeled.InterfaceDeclarationContext):
         self.scope_handler.enterClass(ctx.IDENTIFIER().getText())
@@ -113,9 +120,10 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
 
     # Exit a parse tree produced by JavaParserLabeled#fieldDeclaration.
     def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
-        if self.enter_class:
+        last_scope = self.scope_handler.getScope()[-1]
+        if last_scope == self.class_identifier:
             for variableDeclarator in ctx.variableDeclarators().variableDeclarator():
-                if variableDeclarator.getText() == self.field_identifier:
+                if variableDeclarator.variableDeclaratorId().getText() == self.field_identifier:
                     interval = variableDeclarator.variableDeclaratorId().IDENTIFIER().getSourceInterval()
                     self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_field_identifier)
 
@@ -166,13 +174,15 @@ class SymbolTable:
 class ScopeHandler:
     def __init__(self):
         self.__used_functions = {}
-        self.__scope = []
+        self.__scope = ['MainFile_']
         self.__exited_blocks = []
-
+        self.variable_declarating = False
+    def enterVariableDeclaration(self):
+        self.variable_declarating = True
+    def exitVariableDeclaration(self):
+        self.variable_declarating = False
     def enterClass(self, class_name):
         self.__scope.append(class_name)
-        self.__used_functions.clear()
-        self.__exited_blocks.clear()
     def exitClass(self, class_name):
         if (self.__scope[-1] != class_name):
             print("problem with your scopes!")
@@ -184,7 +194,6 @@ class ScopeHandler:
         else:
             self.__used_functions[method_name] = 0
         self.__scope.append("{}_{}".format(method_name, self.__used_functions[method_name]))
-        self.__exited_blocks = []
     def exitMethod(self, method_name):
         if (self.__scope[-1] != "{}_{}".format(method_name, self.__used_functions[method_name])):
             print("problem with your scopes!")

@@ -25,7 +25,7 @@ from refactorings.rename_method import RenameMethodListener, ImplementaionIdenti
 extensions = []
 implementations = []
 #from speedy.src.java9speedy.parser import sa_java9_v2
-def main(args):
+def main(args, recursive):
     global extensions
     global implementations
     try:
@@ -33,20 +33,23 @@ def main(args):
     except UnicodeDecodeError:
         print(f"Couldn't process {args.file}: Unicode Error")
         return
+    print(f'processing {args.file}')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
     tree = parser.compilationUnit()
 
-    class_id = 'Piece'
-    field_id = "y"
-    new_field_id = "Y_CHANGED"
+    class_id = args.class_id
+    field_id = args.member_id
+    new_field_id = args.new_name
+    method_name = args.member_id
+    new_method_name = args.new_name
     if(args.method == 'rename_method'):
         my_listener = RenameMethodListener(
             common_token_stream=token_stream,
             class_identifier=class_id ,
-            method_name="printG",
-            new_method_name="newName",
+            method_name=method_name,
+            new_method_name=new_method_name,
             is_static=False,
             extentions=extensions,
             implementations=implementations)
@@ -70,8 +73,12 @@ def main(args):
         extensions.extend(my_listener.extensions)
         implementations.extend(my_listener.implementations)
         return
-    with open('input.refactored.java', mode='w', newline='') as f:
-        f.write(my_listener.token_stream_rewriter.getDefaultText())
+    if recursive:
+        with open(args.file.replace("..", "refactored"), mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
+    else:
+        with open('input.refactored.java', mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 
 import os
@@ -87,22 +94,28 @@ def recursive_walk(directory, method):
         for filename in files:
             filename_without_extension, extension = os.path.splitext(filename)
             if(extension == '.java'):
-                process_file("{}/{}".format(dirname, filename), method)
-                shutil.copyfile("input.refactored.java", dirname.replace("..", "refactored") + "/" + filename)
+                process_file("{}/{}".format(dirname, filename), method, True)
+                # shutil.copyfile("input.refactored.java", dirname.replace("..", "refactored") + "/" + filename)
 
 
         # for dir in dirs:
         #     recursive_walk("{}/{}".format(directory, dir), method)
-def process_file(file, method):
+def process_file(file, method, recursive):
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
         '-n', '--file',
         help='Input source', default=file)
     argparser.add_argument(
         '--method', help='Refactoring Method', default=method)
+    class_id = 'King'
+    member_id = "canMove"
+    new_member_id = "Z"
+    argparser.add_argument('--class_id', help="Target Class Identifier", default=class_id)
+    argparser.add_argument('--member_id', help="Target Identifier", default=member_id)
+    argparser.add_argument('--new_name', help="New Name For Target Identifier", default=new_member_id)
 
     args = argparser.parse_args()
-    main(args)
+    main(args, recursive)
 
 if __name__ == '__main__':
     try:
@@ -110,13 +123,13 @@ if __name__ == '__main__':
     except:
         shutil.rmtree("refactored")
         os.mkdir("refactored")
-    directory = '../TestProjects/argouml'
+    directory = '../TestProjects/Chess'
     directories = directory.split('/')
     current_dir = "refactored"
     for dir in directories[1:-1]:
         current_dir = current_dir + f'/{dir}'
         os.mkdir(current_dir)
 
-    recursive_walk(directory, 'inheritance_relations') # for test on a project
-    recursive_walk(directory, 'rename_field')
-    # process_file(r'rcf.java', 'remove_control_flag')
+    # recursive_walk(directory, 'inheritance_relations') # for test on a project
+    # recursive_walk(directory, 'rename_method')
+    process_file(r'rcf.java', 'remove_control_flag', False)

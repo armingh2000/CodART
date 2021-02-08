@@ -1,17 +1,21 @@
 public class Main {
 	public static void main(String[] people) {
-        bool found = true;
+        bool found = false;
 		for(Person p : people){
 			if (!found) {
 				if (p == "Don") {
 					sendAlert();
 					found = true;
 				}
-				if (p == "John") {
+				else if (p == "John") {
 					sendAlert();
 					found = true;
 				}
 			}
+			else {
+			    x = 1;
+			    c = 2;
+			 }
         }
 
         bool found2 = true;
@@ -32,11 +36,11 @@ public class Main {
 		while(found3){
             if (p == "Don") {
                 sendAlert();
-                found3 = true;
+                found3 = false;
             }
-            if (p == "John") {
+            else if (p == "John") {
                 sendAlert();
-                found3 = true;
+                found3 = false;
             }
         }
 
