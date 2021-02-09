@@ -66,7 +66,6 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
         if self.isRelevant:
             if(not self.hasBlock):
                 interval = self.ifStmnt.getSourceInterval()
-                print(self.ifStmnt.getText())
                 stmnt = self.ifStmnt.statement(0)
                 interval2 = stmnt.getSourceInterval()
                 self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.token_stream_rewriter.getText('default', interval2[0] , interval2[1]))
