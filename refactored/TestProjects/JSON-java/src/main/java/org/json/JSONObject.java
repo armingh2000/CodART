@@ -107,7 +107,7 @@ public class JSONObject {
      * undefined.
      */
     private static final class Null {
-        public int I = 45;
+
         /**
          * There is only intended to be a single instance of the NULL object,
          * so the clone method returns itself.
@@ -151,7 +151,7 @@ public class JSONObject {
             return "null";
         }
     }
-    public int I;
+
     /**
      *  Regular Expression Pattern that matches JSON Numbers. This is primarily used for
      *  output to guarantee that we are always writing valid JSON.

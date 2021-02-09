@@ -16,6 +16,7 @@ public class Main {
 			    x = 1;
 			    c = 2;
 			 }
+
         }
 
         bool found2 = true;

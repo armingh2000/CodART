@@ -172,3 +172,4 @@ if __name__ == '__main__':
     else:
         print(f'{len(error_list)} errors occured.')
         print('\n'.join(error_list))
+
