@@ -163,10 +163,10 @@ if __name__ == '__main__':
         current_dir = current_dir + f'/{dir}'
         os.mkdir(current_dir)
 
-    #recursive_walk(directory, 'inheritance_relations') # for test on a project
-    #recursive_walk(directory, 'rename_method')
+    recursive_walk(directory, 'inheritance_relations') # for test on a project
+    recursive_walk(directory, 'rename_field')
 
-    process_file(r'../TestProjects/JSON-java/src/main/java/org/json/JSONPointer.java', 'rename_field', False)
+    #process_file(r'../TestProjects/JSON-java/src/main/java/org/json/JSONPointer.java', 'rename_field', False)
     if(len(error_list) == 0):
         print("Succeffuly done!")
     else:

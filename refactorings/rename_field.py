@@ -70,7 +70,7 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
                 pass
 
     def enterInterfaceDeclaration(self, ctx:JavaParserLabeled.InterfaceDeclarationContext):
-        self.seen_classes.appen(ctx.IDENTIFIER().getText())
+        self.seen_classes.append(ctx.IDENTIFIER().getText())
         self.scope_handler.enterClass(ctx.IDENTIFIER().getText())
         self.symbol_table.AddnewClass(ctx.IDENTIFIER().getText())
         self.enter_class = ctx.IDENTIFIER().getText() == self.class_identifier
@@ -125,7 +125,6 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
 
     # Exit a parse tree produced by JavaParserLabeled#expression1.
     def exitExpression1(self, ctx:JavaParserLabeled.Expression1Context):
-        print(ctx.getText(), self.enter_class, self.seen_classes)
         if self.symbol_table.FindVariableType(self.scope_handler.getScope(), ctx.expression().getText()) == self.class_identifier:
 
             if ctx.children[-1].getText() == self.field_identifier:
