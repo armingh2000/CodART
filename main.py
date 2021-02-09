@@ -138,9 +138,9 @@ def process_file(file, method, recursive):
         help='Input source', default=file)
     argparser.add_argument(
         '--method', help='Refactoring Method', default=method)
-    class_id = 'JSONObject'
-    member_id = "wrongValueFormatException"
-    new_member_id = "SimpleFunction"
+    class_id = 'JSONPointer'
+    member_id = "ENCODING"
+    new_member_id = "ENCODING_CHANGED"
     is_static = "True"
     argparser.add_argument('--class_id', help="Target Class Identifier", default=class_id)
     argparser.add_argument('--member_id', help="Target Identifier", default=member_id)
@@ -166,10 +166,9 @@ if __name__ == '__main__':
     #recursive_walk(directory, 'inheritance_relations') # for test on a project
     #recursive_walk(directory, 'rename_method')
 
-    process_file(r'rcf.java', 'remove_control_flag', False)
+    process_file(r'../TestProjects/JSON-java/src/main/java/org/json/JSONPointer.java', 'rename_field', False)
     if(len(error_list) == 0):
         print("Succeffuly done!")
     else:
         print(f'{len(error_list)} errors occured.')
         print('\n'.join(error_list))
-

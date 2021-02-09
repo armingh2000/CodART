@@ -25,6 +25,8 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
         self.extentions = extentions
         self.implementations = implementations
 
+        self.seen_classes = []
+
         if common_token_stream is not None:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         else:
@@ -51,22 +53,38 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
         self.scope_handler.enterClass(id)
         self.symbol_table.AddnewClass(id)
         self.enter_class = id == self.class_identifier
+        self.seen_classes.append(ctx.IDENTIFIER().getText())
         if(id in self.extentions or id in self.implementations):
             self.enter_class = True
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        self.seen_classes.pop()
         self.scope_handler.exitClass(ctx.IDENTIFIER().getText())
         id = ctx.IDENTIFIER().getText()
         if (id == self.class_identifier):
             self.enter_class = False
+        else:
+            try:
+                self.enter_class = self.seen_classes[-1] == self.class_identifier
+            except:
+                pass
 
     def enterInterfaceDeclaration(self, ctx:JavaParserLabeled.InterfaceDeclarationContext):
+        self.seen_classes.appen(ctx.IDENTIFIER().getText())
         self.scope_handler.enterClass(ctx.IDENTIFIER().getText())
         self.symbol_table.AddnewClass(ctx.IDENTIFIER().getText())
         self.enter_class = ctx.IDENTIFIER().getText() == self.class_identifier
 
     def exitInterfaceDeclaration(self, ctx:JavaParserLabeled.InterfaceDeclarationContext):
-        self.enter_class = False
+        self.seen_classes.pop()
+        if (id == self.class_identifier):
+            self.enter_class = False
+
+        else:
+            try:
+                self.enter_class = self.seen_classes[-1] == self.class_identifier
+            except:
+                pass
         self.scope_handler.exitClass(ctx.IDENTIFIER().getText())
 
     def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
@@ -107,6 +125,7 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
 
     # Exit a parse tree produced by JavaParserLabeled#expression1.
     def exitExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+        print(ctx.getText(), self.enter_class, self.seen_classes)
         if self.symbol_table.FindVariableType(self.scope_handler.getScope(), ctx.expression().getText()) == self.class_identifier:
 
             if ctx.children[-1].getText() == self.field_identifier:
@@ -126,9 +145,6 @@ class RenameFieldRefactoringListener (JavaParserLabeledListener):
                 if variableDeclarator.variableDeclaratorId().getText() == self.field_identifier:
                     interval = variableDeclarator.variableDeclaratorId().IDENTIFIER().getSourceInterval()
                     self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.new_field_identifier)
-
-
-
 
 
 
