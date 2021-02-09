@@ -12,6 +12,11 @@ public class Main {
 					found = true;
 				}
 			}
+			else
+			{
+				c += 0;
+				b = 1;
+			}
         }
 
         bool found2 = true;

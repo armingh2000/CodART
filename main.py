@@ -117,6 +117,6 @@ if __name__ == '__main__':
         current_dir = current_dir + f'/{dir}'
         os.mkdir(current_dir)
 
-    recursive_walk(directory, 'inheritance_relations') # for test on a project
-    recursive_walk(directory, 'rename_field')
-    # process_file(r'rcf.java', 'remove_control_flag')
+    #recursive_walk(directory, 'inheritance_relations') # for test on a project
+    #recursive_walk(directory, 'rename_field')
+    process_file(r'rcf.java', 'remove_control_flag')

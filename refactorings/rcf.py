@@ -24,7 +24,7 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
         if isinstance(ctx.statement(), JavaParserLabeled.Statement0Context):
             self.ifStmnt = ctx.statement().block().blockStatement(0).statement()
             self.hasBlock = True
-            if isinstance(self.ifStmnt, JavaParserLabeled.Statement2Context):
+            if isinstance(self.ifStmnt, JavaParserLabeled.Statement2Context) and len(self.ifStmnt.children) <= 3:
                 exp = self.ifStmnt.parExpression().expression()
                 if isinstance(exp, JavaParserLabeled.Expression0Context):
                     prm = exp.primary()
@@ -42,7 +42,8 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
                             self.relevantVariable = prm.IDENTIFIER().getText()
 
 
-        elif isinstance(ctx.statement(), JavaParserLabeled.Statement2Context):
+        elif isinstance(ctx.statement(), JavaParserLabeled.Statement2Context) and len(ctx.statement().children) <= 3:
+            self.hasBlock = False
             self.ifStmnt = ctx.statement()
             exp = self.ifStmnt.parExpression().expression()
             if isinstance(exp, JavaParserLabeled.Expression0Context):
@@ -65,6 +66,7 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
         if self.isRelevant:
             if(not self.hasBlock):
                 interval = self.ifStmnt.getSourceInterval()
+                print(self.ifStmnt.getText())
                 stmnt = self.ifStmnt.statement(0)
                 interval2 = stmnt.getSourceInterval()
                 self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.token_stream_rewriter.getText('default', interval2[0] , interval2[1]))
@@ -77,15 +79,14 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
                 self.token_stream_rewriter.replaceRange(interval[0], interval[1], self.token_stream_rewriter.getText('default', interval2[0], interval2[1]))
                 declarationInterval = self.lastOccurance[self.relevantVariable].getSourceInterval()
                 self.token_stream_rewriter.replaceRange(declarationInterval[0], declarationInterval[1], "")
-        self.isRelevant -= 1
-        self.hasBlock = False
+            self.isRelevant -= 1
+
 
 
     # Enter a parse tree produced by JavaParserLabeled#statement4.
     def enterStatement4(self, ctx:JavaParserLabeled.Statement4Context):
         if isinstance(ctx.statement(), JavaParserLabeled.Statement0Context):
             self.whileStmnt = ctx
-            self.hasBlock = True
             exp = self.whileStmnt.parExpression().expression()
             if isinstance(exp, JavaParserLabeled.Expression0Context):
                 prm = exp.primary()
@@ -109,7 +110,7 @@ class RemoveControlFlagRefactoringListener (JavaParserLabeledListener):
             self.token_stream_rewriter.replaceRange(interval[0], interval[1], "true")
             declarationInterval = self.lastOccurance[self.relevantVariable].getSourceInterval()
             self.token_stream_rewriter.replaceRange(declarationInterval[0], declarationInterval[1], "")
-        self.isRelevant -= 1
+            self.isRelevant -= 1
 
      # Enter a parse tree produced by JavaParserLabeled#localVariableDeclaration.
     def enterLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
